@@ -1,4 +1,4 @@
-# SMS2Telegram
+# SMS_Forwarder
 
 A minimalist Android app that automatically forwards incoming SMS messages to a Telegram bot. / 自动将 Android 手机短信转发到 Telegram 的极简应用。
 
