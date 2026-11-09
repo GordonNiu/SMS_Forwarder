@@ -10,8 +10,8 @@ android {
         applicationId = "com.smsforwarder"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 10
+        versionName = "0.10"
     }
 
     compileOptions {

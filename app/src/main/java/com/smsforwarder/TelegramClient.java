@@ -13,7 +13,7 @@ public final class TelegramClient {
     private TelegramClient() {
     }
 
-    public static String sendMessage(String token, String chatId, String message) throws Exception {
+    public static boolean sendMessage(String token, String chatId, String message) throws Exception {
         URL url = new URL("https://api.telegram.org/bot" + token + "/sendMessage");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -43,8 +43,8 @@ public final class TelegramClient {
         }
 
         if (responseCode >= 200 && responseCode < 300 && responseBody.toString().contains("\"ok\":true")) {
-            return "发送成功，请检查 Telegram。";
+            return true;
         }
-        return "Telegram 返回错误（HTTP " + responseCode + "）。";
+        return false;
     }
 }

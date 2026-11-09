@@ -52,6 +52,67 @@ public final class SettingsStore {
                 .getBoolean("forwarding_enabled", false);
     }
 
+    public static void setExtraTimezoneEnabled(Context context, boolean enabled) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("extra_timezone_enabled", enabled)
+                .apply();
+    }
+
+    public static boolean isExtraTimezoneEnabled(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean("extra_timezone_enabled", false);
+    }
+
+    public static void setExtraTimezone(Context context, String timezoneId) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putString("extra_timezone", timezoneId)
+                .apply();
+    }
+
+    public static String getExtraTimezone(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getString("extra_timezone", "Asia/Shanghai");
+    }
+
+    public static void setLowBatteryAlertEnabled(Context context, boolean enabled) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("low_battery_alert_enabled", enabled)
+                .apply();
+    }
+
+    public static boolean isLowBatteryAlertEnabled(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean("low_battery_alert_enabled", false);
+    }
+
+    public static void setLowBatteryThreshold(Context context, int threshold) {
+        int safeThreshold = Math.max(1, Math.min(100, threshold));
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putInt("low_battery_threshold", safeThreshold)
+                .apply();
+    }
+
+    public static int getLowBatteryThreshold(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getInt("low_battery_threshold", 20);
+    }
+
+    public static void setLowBatteryAlertSent(Context context, boolean sent) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("low_battery_alert_sent", sent)
+                .apply();
+    }
+
+    public static boolean isLowBatteryAlertSent(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean("low_battery_alert_sent", false);
+    }
+
     private static String encrypt(String value) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey());
