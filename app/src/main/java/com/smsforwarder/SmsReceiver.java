@@ -12,10 +12,19 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class SmsReceiver extends BroadcastReceiver {
-    private static final ExecutorService executor = Executors.newCachedThreadPool();
+    private static final ExecutorService executor = new ThreadPoolExecutor(
+            1,
+            2,
+            30L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(64),
+            new ThreadPoolExecutor.AbortPolicy());
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -32,7 +41,10 @@ public class SmsReceiver extends BroadcastReceiver {
         String sender = messages[0].getOriginatingAddress();
         StringBuilder body = new StringBuilder();
         for (SmsMessage message : messages) {
-            body.append(message.getMessageBody());
+            String messagePart = message.getMessageBody();
+            if (messagePart != null) {
+                body.append(messagePart);
+            }
         }
 
         Date receivedAt = new Date(System.currentTimeMillis());
@@ -70,18 +82,23 @@ public class SmsReceiver extends BroadcastReceiver {
         PendingResult pendingResult = goAsync();
         Context appContext = context.getApplicationContext();
         String finalSmsText = smsText.toString();
-        executor.execute(() -> {
-            try {
-                String token = SettingsStore.getToken(appContext);
-                String chatId = SettingsStore.getChatId(appContext);
-                if (!token.isEmpty() && !chatId.isEmpty()) {
-                    TelegramClient.sendMessage(token, chatId, finalSmsText);
+        try {
+            executor.execute(() -> {
+                try {
+                    String token = SettingsStore.getToken(appContext);
+                    String chatId = SettingsStore.getChatId(appContext);
+                    if (!token.isEmpty() && !chatId.isEmpty()) {
+                        TelegramClient.sendMessage(token, chatId, finalSmsText);
+                    }
+                } catch (Exception exception) {
+                    Log.e("SmsForwarder", "Could not forward received SMS");
+                } finally {
+                    pendingResult.finish();
                 }
-            } catch (Exception exception) {
-                Log.e("SmsForwarder", "Could not forward received SMS");
-            } finally {
-                pendingResult.finish();
-            }
-        });
+            });
+        } catch (RejectedExecutionException exception) {
+            Log.w("SmsForwarder", "SMS forwarding queue is full, dropping message");
+            pendingResult.finish();
+        }
     }
 }

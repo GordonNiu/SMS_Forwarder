@@ -14,6 +14,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,6 +46,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -57,12 +60,18 @@ public class MainActivity extends Activity {
         tokenInput = new EditText(this);
         tokenInput.setHint(R.string.bot_token_hint);
         tokenInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        tokenInput.setImeOptions(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
+        tokenInput.setSaveEnabled(false);
+        tokenInput.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
         layout.addView(tokenInput, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         chatIdInput = new EditText(this);
         chatIdInput.setHint(R.string.chat_id_hint);
         chatIdInput.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+        chatIdInput.setImeOptions(EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING);
+        chatIdInput.setSaveEnabled(false);
+        chatIdInput.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
         layout.addView(chatIdInput, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -157,7 +166,9 @@ public class MainActivity extends Activity {
         layout.addView(statusText);
 
         try {
-            tokenInput.setText(SettingsStore.getToken(this));
+            if (!SettingsStore.getToken(this).isEmpty()) {
+                tokenInput.setHint(R.string.bot_token_saved_hint);
+            }
             chatIdInput.setText(SettingsStore.getChatId(this));
         } catch (Exception exception) {
             statusText.setText(R.string.status_config_read_error);
@@ -175,6 +186,12 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         updateForwardingButton();
+    }
+
+    @Override
+    protected void onDestroy() {
+        executor.shutdown();
+        super.onDestroy();
     }
 
     private void updateForwardingButton() {
@@ -284,31 +301,56 @@ public class MainActivity extends Activity {
     }
 
     private void sendTestMessage() {
-        String token = tokenInput.getText().toString().trim();
+        String enteredToken = tokenInput.getText().toString().trim();
         String chatId = chatIdInput.getText().toString().trim();
+        String token = enteredToken;
+        if (token.isEmpty()) {
+            try {
+                token = SettingsStore.getToken(this);
+            } catch (Exception exception) {
+                statusText.setText(R.string.status_config_read_error);
+                return;
+            }
+        }
         if (token.isEmpty() || chatId.isEmpty()) {
             statusText.setText(R.string.status_config_missing);
+            return;
+        }
+        if (!TelegramClient.isValidToken(token)) {
+            statusText.setText(R.string.status_invalid_token);
+            return;
+        }
+        if (!TelegramClient.isValidChatId(chatId)) {
+            statusText.setText(R.string.status_invalid_chat_id);
             return;
         }
 
         try {
             SettingsStore.save(this, token, chatId);
+            tokenInput.setText("");
+            tokenInput.setHint(R.string.bot_token_saved_hint);
         } catch (Exception exception) {
             statusText.setText(R.string.status_config_save_error);
             return;
         }
 
         statusText.setText(R.string.status_test_sending);
+        String tokenToSend = token;
         executor.execute(() -> {
             String result;
             try {
-                boolean sent = TelegramClient.sendMessage(token, chatId, getString(R.string.test_message));
+                boolean sent = TelegramClient.sendMessage(
+                        tokenToSend, chatId, getString(R.string.test_message));
                 result = getString(sent ? R.string.status_test_sent : R.string.status_test_failed);
             } catch (Exception exception) {
                 result = getString(R.string.status_test_failed);
             }
             String finalResult = result;
-            runOnUiThread(() -> statusText.setText(finalResult));
+            runOnUiThread(() -> {
+                if (!isFinishing() && !isDestroyed()) {
+                    statusText.setText(finalResult);
+                }
+            });
         });
     }
 

@@ -58,7 +58,7 @@ public class BatteryMonitorService extends Service {
         Intent currentBattery;
         if (!receiverRegistered) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                currentBattery = registerReceiver(batteryReceiver, filter, Context.RECEIVER_EXPORTED);
+                currentBattery = registerReceiver(batteryReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
             } else {
                 currentBattery = registerReceiver(batteryReceiver, filter);
             }
@@ -73,7 +73,7 @@ public class BatteryMonitorService extends Service {
     }
 
     private void handleBatteryChanged(Intent intent) {
-        if (intent == null) {
+        if (intent == null || !Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
             return;
         }
         int level = intent.getIntExtra("level", -1);

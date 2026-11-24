@@ -21,6 +21,9 @@ public final class SettingsStore {
     }
 
     public static void save(Context context, String token, String chatId) throws Exception {
+        if (!TelegramClient.isValidToken(token) || !TelegramClient.isValidChatId(chatId)) {
+            throw new IllegalArgumentException("Invalid Telegram credentials");
+        }
         SharedPreferences preferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String encryptedToken = encrypt(token);
         String encryptedChatId = encrypt(chatId);
@@ -134,10 +137,13 @@ public final class SettingsStore {
     }
 
     private static String decrypt(String value) throws Exception {
-        if (value.isEmpty()) {
+        if (value == null || value.isEmpty()) {
             return "";
         }
         String[] parts = value.split(":", 2);
+        if (parts.length != 2 || parts[0].isEmpty() || parts[1].isEmpty()) {
+            throw new IllegalArgumentException("Corrupted encrypted setting");
+        }
         byte[] iv = Base64.decode(parts[0], Base64.NO_WRAP);
         byte[] encrypted = Base64.decode(parts[1], Base64.NO_WRAP);
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
@@ -145,7 +151,7 @@ public final class SettingsStore {
         return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
     }
 
-    private static SecretKey getOrCreateKey() throws Exception {
+    private static synchronized SecretKey getOrCreateKey() throws Exception {
         KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
         keyStore.load(null);
         if (keyStore.containsAlias(KEY_ALIAS)) {
@@ -156,6 +162,7 @@ public final class SettingsStore {
                 KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
         keyGenerator.init(new KeyGenParameterSpec.Builder(KEY_ALIAS,
                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setKeySize(256)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .setRandomizedEncryptionRequired(true)

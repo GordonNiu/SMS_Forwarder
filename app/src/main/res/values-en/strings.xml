@@ -2,6 +2,7 @@
     <string name="app_name">SMS Forwarder</string>
     <string name="screen_title">Telegram Connection Settings</string>
     <string name="bot_token_hint">Bot Token (input is hidden)</string>
+    <string name="bot_token_saved_hint">Bot Token saved (leave blank to keep)</string>
     <string name="chat_id_hint">Chat ID (numbers)</string>
     <string name="sms_time_display">SMS Time Display</string>
     <string name="extra_timezone_toggle">Show an additional time zone</string>
@@ -14,6 +15,8 @@
     <string name="status_config_hint">Enter your Token and Chat ID to test the Telegram connection.</string>
     <string name="status_config_read_error">Could not read the encrypted settings. Enter them again and test.</string>
     <string name="status_config_missing">Enter and test your Telegram settings first.</string>
+    <string name="status_invalid_token">Invalid Bot Token format. Please check and try again.</string>
+    <string name="status_invalid_chat_id">Invalid Chat ID format. Enter numbers only (negative allowed for groups).</string>
     <string name="status_config_save_error">Could not securely save the settings. Restart the app and try again.</string>
     <string name="status_test_sending">Sending test message…</string>
     <string name="status_test_failed">Could not send. Check your network and Telegram settings.</string>
