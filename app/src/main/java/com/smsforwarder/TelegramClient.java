@@ -52,7 +52,9 @@ public final class TelegramClient {
                     "Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
             String body = "chat_id=" + URLEncoder.encode(chatId, "UTF-8")
-                    + "&text=" + URLEncoder.encode(message, "UTF-8");
+                    + "&text=" + URLEncoder.encode(message, "UTF-8")
+                    + "&disable_web_page_preview=true"
+                    + "&link_preview_options=" + URLEncoder.encode("{\"is_disabled\":true}", "UTF-8");
             try (OutputStream output = connection.getOutputStream()) {
                 output.write(body.getBytes(StandardCharsets.UTF_8));
             }

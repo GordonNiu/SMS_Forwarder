@@ -116,6 +116,18 @@ public final class SettingsStore {
                 .getBoolean("low_battery_alert_sent", false);
     }
 
+    public static void setLowBatteryCriticalSent(Context context, boolean sent) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putBoolean("low_battery_critical_sent", sent)
+                .apply();
+    }
+
+    public static boolean isLowBatteryCriticalSent(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getBoolean("low_battery_critical_sent", false);
+    }
+
     public static void setLowBatteryLastAttempt(Context context, long timestamp) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 .edit()

@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "com.smsforwarder"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.smsforwarder"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 36
         versionCode = 10
         versionName = "0.10"
     }

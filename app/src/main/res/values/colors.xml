@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_window">#F2F7F6</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="border_card">#DCE7E5</color>
+
+    <color name="bg_input">#F7FAFA</color>
+    <color name="bg_input_disabled">#EDF3F2</color>
+    <color name="border_input">#C5D6D3</color>
+
+    <color name="brand_primary">#0D9488</color>
+    <color name="brand_primary_pressed">#0F766E</color>
+    <color name="brand_soft">#E6F6F4</color>
+    <color name="brand_soft_pressed">#CCF0EC</color>
+    <color name="brand_on_soft">#0F766E</color>
+
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="text_hint">#94A3B8</color>
+    <color name="text_on_primary">#FFFFFF</color>
+
+    <color name="status_on_bg">#DCFCE7</color>
+    <color name="status_on_text">#15803D</color>
+    <color name="status_off_bg">#E2E8F0</color>
+    <color name="status_off_text">#475569</color>
+
+    <color name="danger_bg">#FEF2F2</color>
+    <color name="danger_bg_pressed">#FEE2E2</color>
+    <color name="danger_border">#FCA5A5</color>
+    <color name="danger_text">#DC2626</color>
+
+    <color name="banner_info_bg">#EBF7F6</color>
+    <color name="banner_info_border">#B2E2DD</color>
+    <color name="banner_info_text">#115E59</color>
+
+    <color name="banner_success_bg">#ECFDF5</color>
+    <color name="banner_success_border">#A7F3D0</color>
+    <color name="banner_success_text">#065F46</color>
+
+    <color name="banner_error_bg">#FEF2F2</color>
+    <color name="banner_error_border">#FECACA</color>
+    <color name="banner_error_text">#991B1B</color>
+
+    <color name="divider">#DCE7E5</color>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Original SMS speech bubble -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,31 H70 A9,9 0 0,1 79,40 V60 A9,9 0 0,1 70,69 H46 L34.5,77.5 C33.3,78.4 31.7,77.3 32.1,75.9 L34.8,68.6 C31.3,67.3 29,63.9 29,60 V40 A9,9 0 0,1 38,31 Z" />
+    <!-- Curved forward arrow inside the bubble -->
+    <path
+        android:fillColor="#0F766E"
+        android:pathData="M57,39 L69,49.5 L57,60 L57,53.8 C49.5,53.8 44.5,56.2 40.5,61.5 C41.8,51.2 47.2,45.2 57,45.2 Z" />
+</vector>
