@@ -12,16 +12,20 @@ import android.content.IntentFilter;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BatteryMonitorService extends Service {
     private static final String CHANNEL_ID = "low_battery_monitor";
     private static final int NOTIFICATION_ID = 2001;
+    private static final long RETRY_COOLDOWN_MILLIS = 5 * 60 * 1000L;
 
     private final ExecutorService sender = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean alertInProgress = new AtomicBoolean(false);
     private boolean receiverRegistered;
 
     private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
@@ -42,6 +46,11 @@ public class BatteryMonitorService extends Service {
         if (!SettingsStore.isLowBatteryAlertEnabled(this)) {
             stopSelf(startId);
             return START_NOT_STICKY;
+        }
+
+        if (SettingsStore.isLowBatteryAlertSent(this)
+                && SettingsStore.getLowBatteryLastAttempt(this) == 0L) {
+            SettingsStore.setLowBatteryAlertSent(this, false);
         }
 
         updateForegroundNotification();
@@ -82,12 +91,18 @@ public class BatteryMonitorService extends Service {
         if (charging) {
             if (percent > threshold) {
                 SettingsStore.setLowBatteryAlertSent(this, false);
+                SettingsStore.setLowBatteryLastAttempt(this, 0L);
             }
             return;
         }
 
-        if (percent <= threshold && !SettingsStore.isLowBatteryAlertSent(this)) {
-            SettingsStore.setLowBatteryAlertSent(this, true);
+        long now = System.currentTimeMillis();
+        long lastAttempt = SettingsStore.getLowBatteryLastAttempt(this);
+        if (percent <= threshold
+                && !SettingsStore.isLowBatteryAlertSent(this)
+                && now - lastAttempt >= RETRY_COOLDOWN_MILLIS
+                && alertInProgress.compareAndSet(false, true)) {
+            SettingsStore.setLowBatteryLastAttempt(this, now);
             sendLowBatteryAlert(percent, threshold);
         }
     }
@@ -97,14 +112,29 @@ public class BatteryMonitorService extends Service {
             try {
                 String token = SettingsStore.getToken(this);
                 String chatId = SettingsStore.getChatId(this);
-                if (!token.isEmpty() && !chatId.isEmpty()) {
-                    String message = getString(R.string.low_battery_alert_message, percent, threshold);
-                    if (!TelegramClient.sendMessage(token, chatId, message)) {
-                        Log.e("SmsForwarder", "Could not send low battery alert");
+                if (token.isEmpty() || chatId.isEmpty()) {
+                    return;
+                }
+
+                String message = getString(R.string.low_battery_alert_message, percent, threshold);
+                for (int attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        if (TelegramClient.sendMessage(token, chatId, message)) {
+                            SettingsStore.setLowBatteryAlertSent(this, true);
+                            return;
+                        }
+                    } catch (Exception exception) {
+                        Log.w("SmsForwarder", "Low battery alert attempt " + attempt + " failed");
+                    }
+                    if (attempt < 3) {
+                        SystemClock.sleep(2000L);
                     }
                 }
+                Log.e("SmsForwarder", "Low battery alert could not be sent after retries");
             } catch (Exception exception) {
-                Log.e("SmsForwarder", "Could not send low battery alert");
+                Log.e("SmsForwarder", "Could not prepare low battery alert");
+            } finally {
+                alertInProgress.set(false);
             }
         });
     }

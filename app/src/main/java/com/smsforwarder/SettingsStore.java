@@ -113,6 +113,18 @@ public final class SettingsStore {
                 .getBoolean("low_battery_alert_sent", false);
     }
 
+    public static void setLowBatteryLastAttempt(Context context, long timestamp) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .edit()
+                .putLong("low_battery_last_attempt", timestamp)
+                .apply();
+    }
+
+    public static long getLowBatteryLastAttempt(Context context) {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                .getLong("low_battery_last_attempt", 0L);
+    }
+
     private static String encrypt(String value) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, getOrCreateKey());
