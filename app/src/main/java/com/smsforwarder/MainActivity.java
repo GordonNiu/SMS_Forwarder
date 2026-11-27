@@ -20,7 +20,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -66,7 +65,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
         LinearLayout rootContent = new LinearLayout(this);
         rootContent.setOrientation(LinearLayout.VERTICAL);
@@ -81,7 +79,10 @@ public class MainActivity extends Activity {
             if (!SettingsStore.getToken(this).isEmpty()) {
                 tokenInput.setHint(R.string.bot_token_saved_hint);
             }
-            chatIdInput.setText(SettingsStore.getChatId(this));
+            String savedChatId = SettingsStore.getChatId(this);
+            if (!savedChatId.isEmpty()) {
+                chatIdInput.setHint(getString(R.string.chat_id_saved_hint, maskChatId(savedChatId)));
+            }
         } catch (Exception exception) {
             setStatusMessage(R.string.status_config_read_error, BannerStyle.ERROR);
         }
@@ -773,11 +774,20 @@ public class MainActivity extends Activity {
 
     private void sendTestMessage() {
         String enteredToken = tokenInput.getText().toString().trim();
-        String chatId = chatIdInput.getText().toString().trim();
+        String enteredChatId = chatIdInput.getText().toString().trim();
         String token = enteredToken;
+        String chatId = enteredChatId;
         if (token.isEmpty()) {
             try {
                 token = SettingsStore.getToken(this);
+            } catch (Exception exception) {
+                setStatusMessage(R.string.status_config_read_error, BannerStyle.ERROR);
+                return;
+            }
+        }
+        if (chatId.isEmpty()) {
+            try {
+                chatId = SettingsStore.getChatId(this);
             } catch (Exception exception) {
                 setStatusMessage(R.string.status_config_read_error, BannerStyle.ERROR);
                 return;
@@ -800,6 +810,8 @@ public class MainActivity extends Activity {
             SettingsStore.save(this, token, chatId);
             tokenInput.setText("");
             tokenInput.setHint(R.string.bot_token_saved_hint);
+            chatIdInput.setText("");
+            chatIdInput.setHint(getString(R.string.chat_id_saved_hint, maskChatId(chatId)));
         } catch (Exception exception) {
             setStatusMessage(R.string.status_config_save_error, BannerStyle.ERROR);
             return;
@@ -807,11 +819,12 @@ public class MainActivity extends Activity {
 
         setStatusMessage(R.string.status_test_sending, BannerStyle.INFO);
         String tokenToSend = token;
+        String chatIdToSend = chatId;
         executor.execute(() -> {
             boolean sent = false;
             try {
                 sent = TelegramClient.sendMessage(
-                        tokenToSend, chatId, getString(R.string.test_message));
+                        tokenToSend, chatIdToSend, getString(R.string.test_message));
             } catch (Exception ignored) {
                 sent = false;
             }
@@ -824,6 +837,29 @@ public class MainActivity extends Activity {
                 }
             });
         });
+    }
+
+    private static String maskChatId(String chatId) {
+        int length = chatId.length();
+        if (length <= 2) {
+            return "*".repeat(length);
+        }
+        int prefixLength;
+        int suffixLength;
+        if (length <= 4) {
+            prefixLength = 1;
+            suffixLength = 1;
+        } else if (length <= 6) {
+            prefixLength = 2;
+            suffixLength = 2;
+        } else {
+            prefixLength = chatId.startsWith("-") && length >= 9 ? 4 : 3;
+            suffixLength = 3;
+        }
+        int maskedLength = Math.max(2, length - prefixLength - suffixLength);
+        return chatId.substring(0, prefixLength)
+                + "*".repeat(maskedLength)
+                + chatId.substring(length - suffixLength);
     }
 
     private void showTimezonePicker() {

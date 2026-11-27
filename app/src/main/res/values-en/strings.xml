@@ -15,6 +15,7 @@
     <string name="bot_token_hint">Bot Token (input is hidden)</string>
     <string name="bot_token_saved_hint">Bot Token saved (leave blank to keep)</string>
     <string name="chat_id_hint">Chat ID (numbers)</string>
+    <string name="chat_id_saved_hint">Saved: %1$s (leave blank to keep)</string>
     <string name="sms_time_display">Additional Time Zone</string>
     <string name="extra_timezone_description">Also include this time zone in forwarded SMS</string>
     <string name="extra_timezone_toggle">Show an additional time zone</string>

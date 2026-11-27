@@ -35,7 +35,7 @@ Designed for a spare Android phone left at home with a physical SIM card (e.g., 
 | --- | --- |
 | **Credential Storage** | Bot Token and Chat ID are encrypted locally with `AndroidKeyStore` (`AES/GCM/NoPadding`, 256-bit key). |
 | **Network** | HTTPS-only (`usesCleartextTraffic="false"`), system CAs only, redirects disabled, credential format validation, and Telegram link previews disabled (`disable_web_page_preview` / `link_preview_options`) so one-time login links aren't pre-fetched. |
-| **UI Privacy** | `FLAG_SECURE` blocks screenshots and recents previews; saved Bot Token is never re-populated into the input field; autofill, view state saving, and personalized keyboard learning are disabled. |
+| **UI Privacy** | Saved Bot Token is never re-populated into the input field, and saved Chat ID only displays masked middle digits (e.g., `123****890`); autofill, view state saving, and personalized keyboard learning are disabled. |
 | **Backup & Isolation** | Cloud backup and Android 12+ device-to-device (D2D) transfers are disabled (`allowBackup="false"`, `dataExtractionRules`); `SmsReceiver` is restricted by `BROADCAST_SMS`. |
 
 ### Quick Start
@@ -91,7 +91,7 @@ Requires JDK 17 and Android SDK (Platform 36):
 | --- | --- |
 | **本地加密存储** | 使用 `AndroidKeyStore` 256 位密钥与 `AES/GCM/NoPadding` 加密保存 Bot Token 和 Chat ID。 |
 | **网络传输加固** | 强制 HTTPS（`usesCleartextTraffic="false"`）、仅信任系统根证书、禁止 HTTP 重定向、严格校验凭据格式，并关闭 Telegram 链接预览，防止一次性登录链接被服务器预抓取。 |
-| **界面防泄露** | 启用 `FLAG_SECURE` 禁止截屏与最近任务缩略图预览；已保存的 Token 不再回填明文；禁用自动填充、视图状态保存与输入法学习。 |
+| **界面防泄露** | 已保存的 Bot Token 不再回填明文，Chat ID 仅展示隐藏中间数字后的脱敏形式（如 `123****890`）；禁用自动填充、视图状态保存与输入法学习。 |
 | **备份与组件隔离** | 禁用云端备份与 Android 12+ 设备间迁移（`allowBackup="false"`、`dataExtractionRules`）；短信接收器仅允许系统 `BROADCAST_SMS` 触发。 |
 
 ### 快速开始

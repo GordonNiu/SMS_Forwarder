@@ -1,0 +1,12 @@
+SMS Forwarder is a minimalist, privacy-focused Android app built for spare phones left at home with a physical SIM card. It listens for incoming SMS messages and forwards them directly to your Telegram bot over HTTPS—with zero third-party SDKs, ads, or relay servers.
+
+Features:
+- Instant SMS Forwarding: Sends sender, timestamp, and message text directly to api.telegram.org.
+- Additional Time Zone: Optionally include a second time zone alongside device local time, with a searchable city and UTC-offset picker.
+- Low-Power Battery Alerts: Uses Android JobScheduler (every 15 minutes, no persistent notification, survives reboots and app updates) plus an urgent alert at 5% or below.
+- Security First:
+  * Bot Token and Chat ID are encrypted locally via AndroidKeyStore (AES-256-GCM).
+  * HTTPS-only with system CAs, redirects disabled, and Telegram link previews disabled so one-time login links are not pre-fetched.
+  * Saved Bot Token is hidden from input fields, saved Chat ID masks middle digits, and cloud/device backups are disabled.
+
+Note: Requires your own Telegram Bot Token and Chat ID. Standard Telegram Bot chats are not end-to-end encrypted; enabling Telegram 2FA is recommended.

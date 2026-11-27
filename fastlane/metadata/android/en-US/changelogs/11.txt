@@ -1,0 +1,4 @@
+- Redesigned Material card UI with light/dark theme support and original teal icon
+- Improved additional time zone picker with popular city chips and offset search
+- Switched low-battery alerts to low-power JobScheduler (no persistent notification, survives reboots and updates) with urgent 5% alert
+- Hardened storage, network, link-preview protection, and UI security (Target SDK 36)
